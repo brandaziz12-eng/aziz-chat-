@@ -1,20 +1,429 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title>My app</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta charset="utf-8">
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شات عزيز (Aziz AI)</title>
     <script src="https://cdn.tailwindcss.com"></script>
-  </head>
-  <body class="flex justify-center items-center h-screen overflow-hidden bg-white font-sans text-center px-6">
-    <div class="w-full">
-      <span class="text-xs rounded-full mb-2 inline-block px-2 py-1 border border-amber-500/15 bg-amber-500/15 text-amber-500">🔥 New version dropped!</span>
-      <h1 class="text-4xl lg:text-6xl font-bold font-sans">
-        <span class="text-2xl lg:text-4xl text-gray-400 block font-medium">I'm ready to work,</span>
-        Ask me anything.
-      </h1>
+    <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Tajawal', sans-serif;
+        }
+        .message-user {
+            border-radius: 18px 18px 0 18px;
+        }
+        .message-ai {
+            border-radius: 18px 18px 18px 0;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #1976D2, #2196F3);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 transition-colors duration-300 dark:bg-gray-900 dark:text-gray-200">
+    <!-- Splash Screen -->
+    <div id="splash-screen" class="fixed inset-0 flex flex-col items-center justify-center bg-white dark:bg-gray-900 z-50 transition-opacity duration-500">
+        <div class="animate-bounce">
+            <i class="fas fa-robot text-6xl text-blue-500 mb-4"></i>
+        </div>
+        <h1 class="text-4xl font-bold gradient-text">شات عزيز</h1>
+        <p class="mt-2 text-gray-500 dark:text-gray-400">Aziz AI</p>
     </div>
-      <img src="https://enzostvs-deepsite.hf.space/arrow.svg" class="absolute bottom-8 left-0 w-[100px] transform rotate-[30deg]" />
-    <script></script>
-  </body>
+
+    <!-- Main Container (hidden initially) -->
+    <div id="app-container" class="hidden max-w-md mx-auto h-screen flex flex-col">
+        <!-- Login Page -->
+        <div id="login-page" class="hidden flex-1 p-6 flex flex-col justify-center">
+            <h2 class="text-3xl font-bold text-center mb-8 dark:text-white">تسجيل الدخول</h2>
+            
+            <form class="space-y-4">
+                <div>
+                    <label for="login-email" class="block text-sm font-medium mb-1 dark:text-gray-300">البريد الإلكتروني</label>
+                    <input type="email" id="login-email" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700" placeholder="example@email.com">
+                </div>
+                
+                <div>
+                    <label for="login-password" class="block text-sm font-medium mb-1 dark:text-gray-300">كلمة المرور</label>
+                    <input type="password" id="login-password" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700" placeholder="••••••••">
+                </div>
+                
+                <div class="flex justify-between items-center">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="remember-me" class="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500 dark:bg-gray-700 dark:border-gray-600">
+                        <label for="remember-me" class="mr-2 text-sm dark:text-gray-300">تذكرني</label>
+                    </div>
+                    <a href="#" onclick="showPage('forgot-password-page')" class="text-sm text-blue-500 hover:underline">نسيت كلمة المرور؟</a>
+                </div>
+                
+                <button type="button" onclick="showPage('chat-page')" class="w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition duration-200">
+                    تسجيل الدخول
+                </button>
+                
+                <div class="relative my-4">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300 dark:border-gray-700"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-400">أو</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center space-x-4">
+                    <button type="button" class="p-2 rounded-full border border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
+                        <i class="fab fa-google text-red-500"></i>
+                    </button>
+                    <button type="button" class="p-2 rounded-full border border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
+                        <i class="fab fa-facebook-f text-blue-600"></i>
+                    </button>
+                </div>
+                
+                <p class="text-center text-sm dark:text-gray-400">
+                    ليس لديك حساب؟ 
+                    <a href="#" onclick="showPage('signup-page')" class="text-blue-500 hover:underline">إنشاء حساب جديد</a>
+                </p>
+            </form>
+        </div>
+
+        <!-- Sign Up Page -->
+        <div id="signup-page" class="hidden flex-1 p-6 flex flex-col justify-center">
+            <h2 class="text-3xl font-bold text-center mb-8 dark:text-white">إنشاء حساب جديد</h2>
+            
+            <form class="space-y-4">
+                <div>
+                    <label for="signup-email" class="block text-sm font-medium mb-1 dark:text-gray-300">البريد الإلكتروني</label>
+                    <input type="email" id="signup-email" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700" placeholder="example@email.com">
+                </div>
+                
+                <div>
+                    <label for="signup-password" class="block text-sm font-medium mb-1 dark:text-gray-300">كلمة المرور</label>
+                    <input type="password" id="signup-password" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700" placeholder="••••••••">
+                </div>
+                
+                <div>
+                    <label for="signup-confirm-password" class="block text-sm font-medium mb-1 dark:text-gray-300">تأكيد كلمة المرور</label>
+                    <input type="password" id="signup-confirm-password" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700" placeholder="••••••••">
+                </div>
+                
+                <button type="button" onclick="showPage('login-page')" class="w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition duration-200">
+                    إنشاء الحساب
+                </button>
+                
+                <div class="relative my-4">
+                    <div class="absolute inset-0 flex items-center">
+                        <div class="w-full border-t border-gray-300 dark:border-gray-700"></div>
+                    </div>
+                    <div class="relative flex justify-center text-sm">
+                        <span class="px-2 bg-gray-50 text-gray-500 dark:bg-gray-900 dark:text-gray-400">أو</span>
+                    </div>
+                </div>
+                
+                <div class="flex justify-center space-x-4">
+                    <button type="button" class="p-2 rounded-full border border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
+                        <i class="fab fa-google text-red-500"></i>
+                    </button>
+                    <button type="button" class="p-2 rounded-full border border-gray-300 hover:bg-gray-100 dark:border-gray-700 dark:hover:bg-gray-800">
+                        <i class="fab fa-facebook-f text-blue-600"></i>
+                    </button>
+                </div>
+                
+                <p class="text-center text-sm dark:text-gray-400">
+                    لديك حساب بالفعل؟ 
+                    <a href="#" onclick="showPage('login-page')" class="text-blue-500 hover:underline">تسجيل الدخول</a>
+                </p>
+            </form>
+        </div>
+
+        <!-- Forgot Password Page -->
+        <div id="forgot-password-page" class="hidden flex-1 p-6 flex flex-col justify-center">
+            <h2 class="text-3xl font-bold text-center mb-8 dark:text-white">نسيت كلمة المرور</h2>
+            
+            <form class="space-y-4">
+                <div>
+                    <label for="forgot-email" class="block text-sm font-medium mb-1 dark:text-gray-300">البريد الإلكتروني</label>
+                    <input type="email" id="forgot-email" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700" placeholder="example@email.com">
+                </div>
+                
+                <button type="button" onclick="showPage('login-page')" class="w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition duration-200">
+                    إرسال رابط إعادة تعيين
+                </button>
+                
+                <p class="text-center text-sm dark:text-gray-400">
+                    تذكرت كلمة المرور؟ 
+                    <a href="#" onclick="showPage('login-page')" class="text-blue-500 hover:underline">تسجيل الدخول</a>
+                </p>
+            </form>
+        </div>
+
+        <!-- Chat Page -->
+        <div id="chat-page" class="hidden flex-1 flex flex-col">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fas fa-robot text-2xl text-blue-500 mr-2"></i>
+                    <h2 class="text-xl font-bold dark:text-white">شات عزيز</h2>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="showPage('image-generation-page')" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800">
+                        <i class="fas fa-image text-blue-500"></i>
+                    </button>
+                    <button onclick="showPage('settings-page')" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800">
+                        <i class="fas fa-cog text-blue-500"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Messages Area -->
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4">
+                <!-- Sample messages -->
+                <div class="flex justify-end">
+                    <div class="max-w-xs md:max-w-md bg-blue-500 text-white p-3 message-user">
+                        مرحبا! كيف يمكنك مساعدتي اليوم؟
+                    </div>
+                </div>
+                <div class="flex justify-start">
+                    <div class="max-w-xs md:max-w-md bg-gray-200 dark:bg-gray-700 p-3 message-ai">
+                        مرحبا! أنا عزيز الذكاء الاصطناعي. يمكنني الإجابة على أسئلتك ومساعدتك في مختلف المواضيع.
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Input Area -->
+            <div class="p-4 border-t border-gray-200 dark:border-gray-800">
+                <div class="flex items-center">
+                    <input type="text" id="chat-input" placeholder="اكتب رسالتك هنا..." class="flex-1 px-4 py-3 rounded-l-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700">
+                    <button onclick="sendMessage()" class="px-4 py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-r-xl">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Image Generation Page -->
+        <div id="image-generation-page" class="hidden flex-1 flex flex-col">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fas fa-image text-2xl text-blue-500 mr-2"></i>
+                    <h2 class="text-xl font-bold dark:text-white">توليد الصور</h2>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="showPage('chat-page')" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800">
+                        <i class="fas fa-comments text-blue-500"></i>
+                    </button>
+                    <button onclick="showPage('settings-page')" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800">
+                        <i class="fas fa-cog text-blue-500"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Content -->
+            <div class="flex-1 p-4 overflow-y-auto">
+                <div class="mb-4">
+                    <label for="image-prompt" class="block text-sm font-medium mb-1 dark:text-gray-300">وصف الصورة</label>
+                    <textarea id="image-prompt" rows="3" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700" placeholder="صِف الصورة التي تريد توليدها..."></textarea>
+                </div>
+                
+                <button onclick="generateImage()" class="w-full py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition duration-200 mb-4">
+                    <i class="fas fa-magic mr-2"></i> توليد صورة
+                </button>
+                
+                <div id="image-result" class="hidden">
+                    <h3 class="text-lg font-medium mb-2 dark:text-white">النتيجة:</h3>
+                    <div class="bg-gray-100 dark:bg-gray-800 rounded-xl p-4 flex justify-center">
+                        <img id="generated-image" src="" alt="Generated image" class="max-w-full h-auto rounded-lg">
+                    </div>
+                    <button onclick="downloadImage()" class="w-full mt-4 py-2 px-4 bg-green-500 hover:bg-green-600 text-white font-medium rounded-xl transition duration-200">
+                        <i class="fas fa-download mr-2"></i> تحميل الصورة
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="settings-page" class="hidden flex-1 flex flex-col">
+            <!-- Header -->
+            <div class="p-4 border-b border-gray-200 dark:border-gray-800 flex justify-between items-center">
+                <div class="flex items-center">
+                    <i class="fas fa-cog text-2xl text-blue-500 mr-2"></i>
+                    <h2 class="text-xl font-bold dark:text-white">الإعدادات</h2>
+                </div>
+                <button onclick="showPage('chat-page')" class="p-2 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800">
+                    <i class="fas fa-arrow-right text-blue-500"></i>
+                </button>
+            </div>
+            
+            <!-- Content -->
+            <div class="flex-1 p-4 overflow-y-auto space-y-6">
+                <!-- Profile Settings -->
+                <div>
+                    <h3 class="text-lg font-medium mb-3 dark:text-white">الملف الشخصي</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1 dark:text-gray-300">الاسم</label>
+                            <input type="text" value="مستخدم" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 dark:text-gray-300">البريد الإلكتروني</label>
+                            <input type="email" value="user@example.com" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700">
+                        </div>
+                        <button class="w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition duration-200">
+                            حفظ التغييرات
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Change Password -->
+                <div>
+                    <h3 class="text-lg font-medium mb-3 dark:text-white">تغيير كلمة المرور</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium mb-1 dark:text-gray-300">كلمة المرور الحالية</label>
+                            <input type="password" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 dark:text-gray-300">كلمة المرور الجديدة</label>
+                            <input type="password" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium mb-1 dark:text-gray-300">تأكيد كلمة المرور الجديدة</label>
+                            <input type="password" class="w-full px-4 py-3 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500 dark:bg-gray-800 dark:border-gray-700">
+                        </div>
+                        <button class="w-full py-2 px-4 bg-blue-500 hover:bg-blue-600 text-white font-medium rounded-xl transition duration-200">
+                            تغيير كلمة المرور
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- App Settings -->
+                <div>
+                    <h3 class="text-lg font-medium mb-3 dark:text-white">إعدادات التطبيق</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="dark:text-gray-300">الوضع الليلي</span>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="dark-mode-toggle" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-300 dark:peer-focus:ring-blue-800 rounded-full peer dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-500"></div>
+                            </label>
+                        </div>
+                        
+                        <div class="flex justify-between items-center">
+                            <span class="dark:text-gray-300">اللغة</span>
+                            <div class="relative">
+                                <select class="appearance-none bg-gray-100 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg py-2 px-3 pr-8 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option>العربية</option>
+                                    <option>English</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 left-0 flex items-center px-2 text-gray-700 dark:text-gray-300">
+                                    <i class="fas fa-chevron-down"></i>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Logout -->
+                <div>
+                    <button onclick="showPage('login-page')" class="w-full py-2 px-4 bg-red-500 hover:bg-red-600 text-white font-medium rounded-xl transition duration-200">
+                        <i class="fas fa-sign-out-alt mr-2"></i> تسجيل الخروج
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Hide splash screen after 2 seconds
+        setTimeout(() => {
+            document.getElementById('splash-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('splash-screen').style.display = 'none';
+                document.getElementById('app-container').classList.remove('hidden');
+                showPage('login-page');
+            }, 500);
+        }, 2000);
+
+        // Page navigation
+        function showPage(pageId) {
+            const pages = ['login-page', 'signup-page', 'forgot-password-page', 'chat-page', 'image-generation-page', 'settings-page'];
+            pages.forEach(page => {
+                document.getElementById(page).classList.add('hidden');
+            });
+            document.getElementById(pageId).classList.remove('hidden');
+        }
+
+        // Send message in chat
+        function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            if (message) {
+                // Add user message
+                const userMessageDiv = document.createElement('div');
+                userMessageDiv.className = 'flex justify-end';
+                userMessageDiv.innerHTML = `
+                    <div class="max-w-xs md:max-w-md bg-blue-500 text-white p-3 message-user">
+                        ${message}
+                    </div>
+                `;
+                document.getElementById('chat-messages').appendChild(userMessageDiv);
+                
+                // Clear input
+                input.value = '';
+                
+                // Simulate AI response after 1 second
+                setTimeout(() => {
+                    const aiMessageDiv = document.createElement('div');
+                    aiMessageDiv.className = 'flex justify-start';
+                    aiMessageDiv.innerHTML = `
+                        <div class="max-w-xs md:max-w-md bg-gray-200 dark:bg-gray-700 p-3 message-ai">
+                            لقد تلقيت رسالتك: "${message}". هذه استجابة افتراضية. في التطبيق الحقيقي، سيتم الاتصال بـ API الذكاء الاصطناعي.
+                        </div>
+                    `;
+                    document.getElementById('chat-messages').appendChild(aiMessageDiv);
+                    
+                    // Scroll to bottom
+                    document.getElementById('chat-messages').scrollTop = document.getElementById('chat-messages').scrollHeight;
+                }, 1000);
+            }
+        }
+
+        // Generate image
+        function generateImage() {
+            const prompt = document.getElementById('image-prompt').value.trim();
+            if (prompt) {
+                // Show loading state
+                const imageResult = document.getElementById('image-result');
+                imageResult.classList.add('hidden');
+                
+                // Simulate API call with timeout
+                setTimeout(() => {
+                    // This would be replaced with actual API call to DALL-E or similar
+                    document.getElementById('generated-image').src = `https://source.unsplash.com/random/600x600/?${encodeURIComponent(prompt.split(' ')[0])}`;
+                    imageResult.classList.remove('hidden');
+                }, 2000);
+            }
+        }
+
+        // Download image
+        function downloadImage() {
+            alert('في التطبيق الحقيقي، سيتم تنزيل الصورة هنا');
+        }
+
+        // Dark mode toggle
+        document.getElementById('dark-mode-toggle').addEventListener('change', function() {
+            document.documentElement.classList.toggle('dark');
+        });
+
+        // Allow pressing Enter to send message
+        document.getElementById('chat-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
 </html>

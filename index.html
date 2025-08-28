@@ -1,200 +1,545 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>شات عزيز</title>
-  <style>
-    body {
-      font-family: "Tahoma", sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-    }
-
-    .chat-container {
-      width: 95%;
-      max-width: 450px;
-      background: #fff;
-      border-radius: 15px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
-    .chat-header {
-      background: #1e88e5;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 20px;
-      font-weight: bold;
-    }
-
-    #chat-box {
-      height: 400px;
-      overflow-y: auto;
-      padding: 10px;
-      background: #fafafa;
-    }
-
-    .chat-input {
-      display: flex;
-      gap: 8px;
-      padding: 10px;
-      border-top: 1px solid #ddd;
-      background: #fff;
-    }
-
-    .chat-input input[type="text"] {
-      flex: 1;
-      padding: 10px;
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-
-    .chat-input button {
-      padding: 10px;
-      border: none;
-      background: #1e88e5;
-      color: white;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-
-    .user-msg, .bot-msg {
-      margin: 5px 0;
-    }
-
-    .user-msg {
-      text-align: right;
-    }
-
-    .user-msg span, .user-msg img, .user-msg audio {
-      background: #1e88e5;
-      color: white;
-      padding: 8px 12px;
-      border-radius: 10px;
-      display: inline-block;
-      max-width: 70%;
-    }
-
-    .bot-msg {
-      text-align: left;
-    }
-
-    .bot-msg span {
-      background: #eee;
-      padding: 8px 12px;
-      border-radius: 10px;
-      display: inline-block;
-    }
-
-    img {
-      max-width: 200px;
-      border-radius: 8px;
-    }
-
-    audio {
-      margin-top: 5px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>شات عزيز | Aziz AI</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap');
+        
+        body {
+            font-family: 'Tajawal', sans-serif;
+        }
+        
+        .chat-bubble-user {
+            background-color: #1976D2;
+            color: white;
+            border-radius: 15px 15px 0 15px;
+        }
+        
+        .chat-bubble-ai {
+            background-color: #f1f1f1;
+            color: #212121;
+            border-radius: 15px 15px 15px 0;
+        }
+        
+        .splash-screen {
+            background-color: #1976D2;
+            animation: fadeOut 1.5s forwards 2s;
+        }
+        
+        @keyframes fadeOut {
+            to {
+                opacity: 0;
+                visibility: hidden;
+            }
+        }
+        
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s infinite;
+        }
+        
+        @keyframes dots {
+            0%, 20% { content: '.'; }
+            40% { content: '..'; }
+            60%, 100% { content: '...'; }
+        }
+    </style>
 </head>
-<body>
-
-  <div class="chat-container">
-    <div class="chat-header">🤖 شات عزيز</div>
-
-    <div id="chat-box">
-      <div class="bot-msg"><span>مرحباً بك في شات عزيز! كيف يمكنني مساعدتك اليوم؟</span></div>
+<body class="bg-gray-50 text-gray-800">
+    <!-- Splash Screen -->
+    <div id="splash" class="splash-screen fixed inset-0 flex items-center justify-center z-50">
+        <div class="text-center">
+            <div class="text-5xl mb-4 text-white">🤖</div>
+            <h1 class="text-3xl font-bold text-white">شات عزيز</h1>
+            <p class="text-white mt-2">Aziz AI</p>
+        </div>
     </div>
 
-    <div class="chat-input">
-      <input type="text" id="userInput" placeholder="اكتب رسالتك هنا..." 
-             onkeypress="if(event.key === 'Enter') sendMessage();">
-      <button onclick="sendMessage()">إرسال</button>
-      <button onclick="document.getElementById('imageInput').click()">📷</button>
-      <button onclick="startRecording()">🎤</button>
-      <input type="file" id="imageInput" accept="image/*" style="display:none" onchange="sendImage(event)">
+    <!-- Login Screen -->
+    <div id="login" class="hidden min-h-screen flex flex-col justify-center p-6">
+        <div class="bg-white rounded-lg shadow-md p-6 max-w-md w-full mx-auto">
+            <h2 class="text-2xl font-bold text-center mb-6">تسجيل الدخول</h2>
+            
+            <div class="mb-4">
+                <label for="email" class="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
+                <input type="email" id="email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div class="mb-6">
+                <label for="password" class="block text-sm font-medium text-gray-700 mb-1">كلمة المرور</label>
+                <input type="password" id="password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <button onclick="login()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 mb-4">
+                تسجيل الدخول
+            </button>
+            
+            <div class="text-center text-sm">
+                <a href="#" class="text-blue-600 hover:underline mb-2 block">نسيت كلمة المرور؟</a>
+                <p class="text-gray-600">ليس لديك حساب؟ <a href="#" onclick="showScreen('register')" class="text-blue-600 hover:underline">إنشاء حساب</a></p>
+            </div>
+            
+            <div class="flex items-center my-4">
+                <div class="flex-1 h-px bg-gray-300"></div>
+                <span class="px-3 text-gray-500">أو</span>
+                <div class="flex-1 h-px bg-gray-300"></div>
+            </div>
+            
+            <div class="flex justify-center space-x-4">
+                <button class="p-2 rounded-full border border-gray-300 hover:bg-gray-100">
+                    <i class="fab fa-google text-red-500"></i>
+                </button>
+                <button class="p-2 rounded-full border border-gray-300 hover:bg-gray-100">
+                    <i class="fab fa-facebook-f text-blue-600"></i>
+                </button>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <script>
-    const chatBox = document.getElementById("chat-box");
+    <!-- Register Screen -->
+    <div id="register" class="hidden min-h-screen flex flex-col justify-center p-6">
+        <div class="bg-white rounded-lg shadow-md p-6 max-w-md w-full mx-auto">
+            <h2 class="text-2xl font-bold text-center mb-6">إنشاء حساب</h2>
+            
+            <div class="mb-4">
+                <label for="reg-name" class="block text-sm font-medium text-gray-700 mb-1">الاسم الكامل</label>
+                <input type="text" id="reg-name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div class="mb-4">
+                <label for="reg-email" class="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
+                <input type="email" id="reg-email" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div class="mb-4">
+                <label for="reg-password" class="block text-sm font-medium text-gray-700 mb-1">كلمة المرور</label>
+                <input type="password" id="reg-password" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <div class="mb-6">
+                <label for="reg-confirm" class="block text-sm font-medium text-gray-700 mb-1">تأكيد كلمة المرور</label>
+                <input type="password" id="reg-confirm" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+            </div>
+            
+            <button onclick="register()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 mb-4">
+                إنشاء حساب
+            </button>
+            
+            <div class="text-center text-sm">
+                <p class="text-gray-600">لديك حساب بالفعل؟ <a href="#" onclick="showScreen('login')" class="text-blue-600 hover:underline">تسجيل الدخول</a></p>
+            </div>
+        </div>
+    </div>
 
-    function addMessage(content, sender = "user") {
-      const msg = document.createElement("div");
-      msg.className = sender === "user" ? "user-msg" : "bot-msg";
-      msg.innerHTML = content;
-      chatBox.appendChild(msg);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
+    <!-- Main Dashboard -->
+    <div id="dashboard" class="hidden min-h-screen flex flex-col">
+        <header class="bg-blue-600 text-white p-4 shadow-md">
+            <div class="flex justify-between items-center">
+                <h1 class="text-xl font-bold">شات عزيز</h1>
+                <button onclick="toggleLanguage()" class="px-3 py-1 bg-blue-700 rounded-lg text-sm">En</button>
+            </div>
+        </header>
+        
+        <main class="flex-1 p-4 grid grid-cols-2 gap-4">
+            <div onclick="showScreen('chat')" class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 transition">
+                <div class="text-4xl mb-3">🤖</div>
+                <h3 class="font-medium">الدردشة الذكية</h3>
+            </div>
+            
+            <div onclick="showScreen('image-gen')" class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 transition">
+                <div class="text-4xl mb-3">🖼️</div>
+                <h3 class="font-medium">توليد الصور</h3>
+            </div>
+            
+            <div onclick="showScreen('profile')" class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 transition">
+                <div class="text-4xl mb-3">👤</div>
+                <h3 class="font-medium">الملف الشخصي</h3>
+            </div>
+            
+            <div onclick="showScreen('settings')" class="bg-white rounded-lg shadow-md p-6 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-gray-50 transition">
+                <div class="text-4xl mb-3">⚙️</div>
+                <h3 class="font-medium">الإعدادات</h3>
+            </div>
+        </main>
+    </div>
 
-    function sendMessage() {
-      const input = document.getElementById("userInput");
-      const message = input.value.trim();
-      if (message === "") return;
-      addMessage(`<span>${message}</span>`, "user");
-      input.value = "";
+    <!-- Chat Screen -->
+    <div id="chat" class="hidden min-h-screen flex flex-col">
+        <header class="bg-blue-600 text-white p-4 shadow-md flex items-center">
+            <button onclick="showScreen('dashboard')" class="mr-2">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="text-xl font-bold flex-1 text-center">الدردشة الذكية</h1>
+        </header>
+        
+        <main class="flex-1 p-4 overflow-y-auto" id="chat-messages">
+            <!-- Sample messages -->
+            <div class="flex justify-end mb-3">
+                <div class="chat-bubble-user px-4 py-2 max-w-xs">
+                    مرحبا، كيف حالك؟
+                </div>
+            </div>
+            
+            <div class="flex justify-start mb-3">
+                <div class="chat-bubble-ai px-4 py-2 max-w-xs">
+                    مرحبًا بك! كيف أستطيع مساعدتك اليوم؟
+                </div>
+            </div>
+            
+            <div id="typing-indicator" class="hidden flex justify-start mb-3">
+                <div class="chat-bubble-ai px-4 py-2 max-w-xs">
+                    <span class="loading-dots">يرسل</span>
+                </div>
+            </div>
+        </main>
+        
+        <footer class="p-3 border-t border-gray-200 bg-white">
+            <div class="flex items-center">
+                <button class="p-2 text-gray-500 hover:text-gray-700 mx-1">
+                    <i class="fas fa-camera"></i>
+                </button>
+                <button class="p-2 text-gray-500 hover:text-gray-700 mx-1">
+                    <i class="fas fa-microphone"></i>
+                </button>
+                <input type="text" id="message-input" placeholder="اكتب رسالتك..." class="flex-1 border border-gray-300 rounded-lg px-4 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 mx-1">
+                <button onclick="sendMessage()" class="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 mx-1">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </footer>
+    </div>
 
-      setTimeout(() => {
-        addMessage(`<span>لقد استلمت: ${message}</span>`, "bot");
-      }, 600);
-    }
+    <!-- Image Generation Screen -->
+    <div id="image-gen" class="hidden min-h-screen flex flex-col">
+        <header class="bg-blue-600 text-white p-4 shadow-md flex items-center">
+            <button onclick="showScreen('dashboard')" class="mr-2">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="text-xl font-bold flex-1 text-center">توليد الصور</h1>
+        </header>
+        
+        <main class="flex-1 p-4">
+            <div class="mb-4">
+                <label for="prompt" class="block text-sm font-medium text-gray-700 mb-1">وصف الصورة</label>
+                <textarea id="prompt" rows="3" placeholder="صف وصفًا دقيقًا للصورة..." class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
+            </div>
+            
+            <button onclick="generateImage()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 mb-6">
+                توليد صورة
+            </button>
+            
+            <div id="image-results" class="grid grid-cols-2 gap-4">
+                <!-- Images will appear here -->
+                <div class="bg-gray-200 rounded-lg aspect-square flex items-center justify-center text-gray-400">
+                    <i class="fas fa-image text-3xl"></i>
+                </div>
+                <div class="bg-gray-200 rounded-lg aspect-square flex items-center justify-center text-gray-400">
+                    <i class="fas fa-image text-3xl"></i>
+                </div>
+                <div class="bg-gray-200 rounded-lg aspect-square flex items-center justify-center text-gray-400">
+                    <i class="fas fa-image text-3xl"></i>
+                </div>
+                <div class="bg-gray-200 rounded-lg aspect-square flex items-center justify-center text-gray-400">
+                    <i class="fas fa-image text-3xl"></i>
+                </div>
+            </div>
+            
+            <div id="loading-images" class="hidden text-center py-8">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-blue-600 mb-2"></div>
+                <p>جاري توليد الصور...</p>
+            </div>
+        </main>
+    </div>
 
-    function sendImage(event) {
-      const file = event.target.files[0];
-      if (!file) return;
+    <!-- Profile Screen -->
+    <div id="profile" class="hidden min-h-screen flex flex-col">
+        <header class="bg-blue-600 text-white p-4 shadow-md flex items-center">
+            <button onclick="showScreen('dashboard')" class="mr-2">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="text-xl font-bold flex-1 text-center">الملف الشخصي</h1>
+        </header>
+        
+        <main class="flex-1 p-6">
+            <div class="bg-white rounded-lg shadow-md p-6 max-w-md mx-auto">
+                <div class="flex justify-center mb-6">
+                    <div class="relative">
+                        <div class="w-24 h-24 rounded-full bg-gray-200 flex items-center justify-center text-4xl text-gray-400">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <button class="absolute bottom-0 right-0 bg-blue-600 text-white rounded-full p-2 hover:bg-blue-700">
+                            <i class="fas fa-camera text-sm"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">الاسم</label>
+                        <div class="bg-gray-100 px-4 py-2 rounded-lg">محمد أحمد</div>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
+                        <div class="bg-gray-100 px-4 py-2 rounded-lg">example@email.com</div>
+                    </div>
+                    
+                    <button onclick="showScreen('edit-profile')" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 mt-6">
+                        تعديل الملف الشخصي
+                    </button>
+                    
+                    <button onclick="logout()" class="w-full bg-gray-200 text-gray-800 py-2 px-4 rounded-lg hover:bg-gray-300 transition duration-200">
+                        تسجيل الخروج
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
 
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        addMessage(`<img src="${e.target.result}" alt="صورة">`, "user");
+    <!-- Edit Profile Screen -->
+    <div id="edit-profile" class="hidden min-h-screen flex flex-col">
+        <header class="bg-blue-600 text-white p-4 shadow-md flex items-center">
+            <button onclick="showScreen('profile')" class="mr-2">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="text-xl font-bold flex-1 text-center">تعديل الملف الشخصي</h1>
+        </header>
+        
+        <main class="flex-1 p-6">
+            <div class="bg-white rounded-lg shadow-md p-6 max-w-md mx-auto">
+                <div class="space-y-4">
+                    <div>
+                        <label for="edit-name" class="block text-sm font-medium text-gray-700 mb-1">الاسم</label>
+                        <input type="text" id="edit-name" value="محمد أحمد" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="edit-email" class="block text-sm font-medium text-gray-700 mb-1">البريد الإلكتروني</label>
+                        <input type="email" id="edit-email" value="example@email.com" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label for="edit-password" class="block text-sm font-medium text-gray-700 mb-1">كلمة المرور الجديدة (اختياري)</label>
+                        <input type="password" id="edit-password" placeholder="اتركه فارغًا إذا لم ترغب في التغيير" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <button onclick="saveProfile()" class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition duration-200 mt-6">
+                        حفظ التغييرات
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
 
-        setTimeout(() => {
-          addMessage(`<span>تم استلام الصورة ✅</span>`, "bot");
-        }, 600);
-      };
-      reader.readAsDataURL(file);
-    }
+    <!-- Settings Screen -->
+    <div id="settings" class="hidden min-h-screen flex flex-col">
+        <header class="bg-blue-600 text-white p-4 shadow-md flex items-center">
+            <button onclick="showScreen('dashboard')" class="mr-2">
+                <i class="fas fa-arrow-left"></i>
+            </button>
+            <h1 class="text-xl font-bold flex-1 text-center">الإعدادات</h1>
+        </header>
+        
+        <main class="flex-1 p-4">
+            <div class="bg-white rounded-lg shadow-md overflow-hidden max-w-md mx-auto">
+                <div class="p-4 border-b border-gray-200">
+                    <h3 class="font-medium">اللغة</h3>
+                    <div class="mt-2">
+                        <select class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option>العربية</option>
+                            <option>English</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="p-4 border-b border-gray-200">
+                    <h3 class="font-medium">المظهر</h3>
+                    <div class="mt-2 flex space-x-4">
+                        <button class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-100">
+                            نهاري
+                        </button>
+                        <button class="px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700">
+                            ليلي
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="p-4 border-b border-gray-200">
+                    <h3 class="font-medium">حول التطبيق</h3>
+                    <p class="text-sm text-gray-600 mt-2">شات عزيز | Aziz AI - الإصدار 1.0.0</p>
+                </div>
+                
+                <div class="p-4">
+                    <a href="#" class="block text-blue-600 hover:underline mb-3">سياسة الخصوصية</a>
+                    <a href="#" class="block text-blue-600 hover:underline">الشروط والأحكام</a>
+                </div>
+            </div>
+        </main>
+    </div>
 
-    // 🎤 تسجيل صوت
-    let mediaRecorder;
-    let audioChunks = [];
-
-    function startRecording() {
-      navigator.mediaDevices.getUserMedia({ audio: true })
-        .then(stream => {
-          mediaRecorder = new MediaRecorder(stream);
-          mediaRecorder.start();
-          audioChunks = [];
-
-          mediaRecorder.addEventListener("dataavailable", event => {
-            audioChunks.push(event.data);
-          });
-
-          mediaRecorder.addEventListener("stop", () => {
-            const audioBlob = new Blob(audioChunks, { type: "audio/mpeg" });
-            const audioUrl = URL.createObjectURL(audioBlob);
-            addMessage(`<audio controls src="${audioUrl}"></audio>`, "user");
-
-            setTimeout(() => {
-              addMessage(`<span>تم استلام الصوت 🎤</span>`, "bot");
-            }, 600);
-          });
-
-          setTimeout(() => {
-            mediaRecorder.stop();
-          }, 4000); // تسجيل ٤ ثواني فقط
+    <script>
+        // Show splash screen first
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                document.getElementById('splash').style.display = 'none';
+                // Check if user is logged in (in a real app, this would check localStorage or a cookie)
+                const isLoggedIn = false; // Change to true to skip login
+                
+                if (isLoggedIn) {
+                    showScreen('dashboard');
+                } else {
+                    showScreen('login');
+                }
+            }, 2000);
         });
-    }
-  </script>
-
+        
+        // Show a specific screen and hide others
+        function showScreen(screenId) {
+            const screens = ['login', 'register', 'dashboard', 'chat', 'image-gen', 'profile', 'edit-profile', 'settings'];
+            
+            screens.forEach(screen => {
+                const element = document.getElementById(screen);
+                if (screen === screenId) {
+                    element.classList.remove('hidden');
+                } else {
+                    element.classList.add('hidden');
+                }
+            });
+        }
+        
+        // Login function
+        function login() {
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            if (!email || !password) {
+                alert('الرجاء إدخال البريد الإلكتروني وكلمة المرور');
+                return;
+            }
+            
+            // In a real app, this would call an API
+            showScreen('dashboard');
+        }
+        
+        // Register function
+        function register() {
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+            const password = document.getElementById('reg-password').value;
+            const confirm = document.getElementById('reg-confirm').value;
+            
+            if (!name || !email || !password || !confirm) {
+                alert('الرجاء ملء جميع الحقول');
+                return;
+            }
+            
+            if (password !== confirm) {
+                alert('كلمة المرور وتأكيدها غير متطابقين');
+                return;
+            }
+            
+            // In a real app, this would call an API
+            showScreen('dashboard');
+        }
+        
+        // Logout function
+        function logout() {
+            // In a real app, this would clear the auth token
+            showScreen('login');
+        }
+        
+        // Save profile function
+        function saveProfile() {
+            const name = document.getElementById('edit-name').value;
+            const email = document.getElementById('edit-email').value;
+            const password = document.getElementById('edit-password').value;
+            
+            if (!name || !email) {
+                alert('الرجاء إدخال الاسم والبريد الإلكتروني');
+                return;
+            }
+            
+            // In a real app, this would call an API
+            showScreen('profile');
+        }
+        
+        // Toggle language
+        function toggleLanguage() {
+            // In a real app, this would change the language of the app
+            alert('سيتم تبديل اللغة في الإصدارات القادمة');
+        }
+        
+        // Send message in chat
+        function sendMessage() {
+            const input = document.getElementById('message-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            const chatContainer = document.getElementById('chat-messages');
+            const userMessage = document.createElement('div');
+            userMessage.className = 'flex justify-end mb-3';
+            userMessage.innerHTML = `<div class="chat-bubble-user px-4 py-2 max-w-xs">${message}</div>`;
+            chatContainer.appendChild(userMessage);
+            
+            // Clear input
+            input.value = '';
+            
+            // Show typing indicator
+            const typingIndicator = document.getElementById('typing-indicator');
+            typingIndicator.classList.remove('hidden');
+            
+            // Scroll to bottom
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+            
+            // Simulate AI response after a delay
+            setTimeout(function() {
+                typingIndicator.classList.add('hidden');
+                
+                const aiMessage = document.createElement('div');
+                aiMessage.className = 'flex justify-start mb-3';
+                aiMessage.innerHTML = `<div class="chat-bubble-ai px-4 py-2 max-w-xs">هذه استجابة تجريبية من المساعد. في التطبيق الحقيقي، سيتم استبدال هذا بالرد من الذكاء الاصطناعي.</div>`;
+                chatContainer.appendChild(aiMessage);
+                
+                // Scroll to bottom again
+                chatContainer.scrollTop = chatContainer.scrollHeight;
+            }, 1500);
+        }
+        
+        // Generate image
+        function generateImage() {
+            const prompt = document.getElementById('prompt').value.trim();
+            
+            if (!prompt) {
+                alert('الرجاء إدخال وصف للصورة');
+                return;
+            }
+            
+            // Show loading
+            document.getElementById('image-results').classList.add('hidden');
+            document.getElementById('loading-images').classList.remove('hidden');
+            
+            // Simulate API call delay
+            setTimeout(function() {
+                document.getElementById('loading-images').classList.add('hidden');
+                document.getElementById('image-results').classList.remove('hidden');
+                
+                // In a real app, this would display the actual generated images
+                alert('في التطبيق الحقيقي، سيتم استبدال هذا بعرض الصور المولدة من وصفك');
+            }, 3000);
+        }
+        
+        // Handle pressing Enter in message input
+        document.getElementById('message-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    </script>
 </body>
 </html>
